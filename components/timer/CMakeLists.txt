@@ -1,0 +1,9 @@
+idf_component_register(
+    SRCS
+        "timer_config.c"
+    INCLUDE_DIRS
+        "."
+    REQUIRES
+       esp_driver_gptimer
+       esp_timer
+)
