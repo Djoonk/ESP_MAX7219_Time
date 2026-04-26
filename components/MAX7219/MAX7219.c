@@ -1,6 +1,6 @@
 #include "MAX7219.h"
 
-static const char *TAG2= "NUMBER";
+static const char *TAG= "NUMBER";
 
 extern spi_device_handle_t spi;
 
@@ -52,7 +52,7 @@ void MAX7219_Number(volatile long num)
     do
     {
         MAX7219_SendData(++i, num % 10);
-        ESP_LOGI(TAG2, "NUM = %d\n", num);
+        ESP_LOGI(TAG, "NUM = %d\n", num);
         num /= 10;
         
     } while (num);
@@ -63,18 +63,5 @@ void MAX7219_Number(volatile long num)
 }
 
 
-// передаємо значення часу на MAX7219
-void timeSet(uint32_t h, uint32_t m, uint32_t s)
-{
-    MAX7219_Clear();
-    // sec
-   
-    MAX7219_SendData(1, s % 10);
-    MAX7219_SendData(2, s / 10);
-    // min
-    MAX7219_SendData(3, (m % 10)|0x80);
-    MAX7219_SendData(4, (m / 10) );
-    // hour
-    MAX7219_SendData(5, (h % 10)|0x80);
-    MAX7219_SendData(6, h / 10);
-}
+
+

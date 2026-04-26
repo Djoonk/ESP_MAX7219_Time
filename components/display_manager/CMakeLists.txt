@@ -1,0 +1,10 @@
+idf_component_register(
+    SRCS
+       display_manager.c
+    INCLUDE_DIRS
+        "."
+    REQUIRES
+        esp_driver_spi 
+        wifi_ntp
+        MAX7219
+)

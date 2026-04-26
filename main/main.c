@@ -11,55 +11,36 @@
 #include "sdkconfig.h"
 #include <stdbool.h>
 #include "MAX7219.h"
+#include "esp_sntp.h"
+#include "wifi_ntp.h"
+#include "esp_sleep.h"
+#include "esp_netif.h"         // Для мережевого стеку
+#include "esp_netif_sntp.h"    // Для NTP
+#include "display_manager.h"
 
-static const char *TAG = "time";
-extern gptimer_handle_t gptimer;
-
-volatile uint32_t time = 0;
-bool flagTime = false;
-
-void task_MAX7219(void *pvParameters);
-void task_time(void *pvParameters);
-
-void task_MAX7219(void *pvParameters)
-{
-    while (1)
-    {
-        if (flagTime)
-        {
-            uint32_t h = time / 3600;
-            uint32_t m = (time % 3600) / 60;
-            uint32_t s = time % 60;
-            flagTime = false;
-            ESP_LOGI(TAG, "Time: %02d:%02d:%02d", h, m, s);
-            timeSet(h, m, s);
-        }
-        vTaskDelay(pdMS_TO_TICKS(100));
-    }
-    // vTaskDelete(NULL);
-}
+// RTC_DATA_ATTR static int boot_count = 0;
+static const char *TAG = "Time";
 
 void app_main(void)
 {
-    // init_timer_bus();
-    // start_timer();
+    vTaskDelay(pdMS_TO_TICKS(100));
     init_spi_bus();
     init_spi_device();
     MAX7219_Init();
-    timerInit();
-    
-    //----------------Get time------------------
-    // MAX7219_Clear();
-    // MAX7219_Number(-9876543);
-    
-    // int64_t t1 = esp_timer_get_time();
-    // ESP_LOGI(TAG, "time value = %d", t1);
-    // xTaskCreate(task_time, "task_time",4090,NULL,5,NULL);
-    xTaskCreate(task_MAX7219, "task_time",4090,NULL,5,NULL);
 
-    // while (1)
-    // {
-    //     vTaskDelay(500 / portTICK_PERIOD_MS);
-    // }
+    // 1. Базова ініціалізація
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+    {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    } 
+    ESP_ERROR_CHECK(ret);
+    wifi_init();
+
+    sntpSyncTime();
+//=============================================================
+    xTaskCreate(xTimeTask, "MaxTask", 2048, NULL, 5, NULL);
+
 }
 

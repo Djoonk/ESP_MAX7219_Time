@@ -10,7 +10,9 @@ extern "C" {
 #include <inttypes.h>
 #include "stdbool.h"
 #include "esp_log.h"
-
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "wifi_ntp.h"
 
 #define SPI2                    SPI2_HOST
 #define PIN_NUM_SCLK            22
@@ -42,14 +44,12 @@ extern "C" {
 #define DECODE_FOR_DIGIT_3_0    0x0F
 #define DECODE_FOR_DIGIT_7_0    0xFF
 
-
-
-// function prototipe
+// function prototype
 void MAX7219_SendData(uint8_t adress, uint8_t dat);
 void MAX7219_Clear(void);
 void MAX7219_Init(void);
 void MAX7219_SetHour(volatile long num);
-void timeSet(uint32_t h,uint32_t m,uint32_t s);
+
 #ifdef __cplusplus
 }
 #endif
